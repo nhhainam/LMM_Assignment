@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LMMWebAPI.DataAccess;
+using AutoMapper;
+using LMMWebAPI.Models;
 
 namespace LMMWebAPI.Controllers
 {
@@ -13,13 +15,17 @@ namespace LMMWebAPI.Controllers
     [ApiController]
     public class MaterialsController : ControllerBase
     {
+        private IConfiguration _config;
         private readonly LmmAssignmentContext _context;
+        private readonly IMapper mapper;
 
-        public MaterialsController(LmmAssignmentContext context)
+        public MaterialsController(LmmAssignmentContext context, IConfiguration config)
         {
             _context = context;
+            _config = config;
+            var mapconfig = new MapperConfiguration(cfg => cfg.AddProfile(new MappingProfile()));
+            this.mapper = mapconfig.CreateMapper();
         }
-
         // GET: api/Materials
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Material>>> GetMaterials()

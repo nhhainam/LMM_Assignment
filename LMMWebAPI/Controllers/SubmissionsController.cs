@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LMMWebAPI.DataAccess;
+using AutoMapper;
+using LMMWebAPI.Models;
 
 namespace LMMWebAPI.Controllers
 {
@@ -13,11 +15,16 @@ namespace LMMWebAPI.Controllers
     [ApiController]
     public class SubmissionsController : ControllerBase
     {
+        private IConfiguration _config;
         private readonly LmmAssignmentContext _context;
+        private readonly IMapper mapper;
 
-        public SubmissionsController(LmmAssignmentContext context)
+        public SubmissionsController(LmmAssignmentContext context, IConfiguration config)
         {
             _context = context;
+            _config = config;
+            var mapconfig = new MapperConfiguration(cfg => cfg.AddProfile(new MappingProfile()));
+            this.mapper = mapconfig.CreateMapper();
         }
 
         // GET: api/Submissions

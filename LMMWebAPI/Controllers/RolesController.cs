@@ -6,6 +6,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LMMWebAPI.DataAccess;
+using AutoMapper;
+using LMMWebAPI.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace LMMWebAPI.Controllers
 {
@@ -13,111 +17,57 @@ namespace LMMWebAPI.Controllers
     [ApiController]
     public class RolesController : ControllerBase
     {
-        private readonly LmmAssignmentContext _context;
-
-        public RolesController(LmmAssignmentContext context)
+        [HttpGet("Teacher")]
+        [Authorize(Roles = "2")]
+        public IActionResult AdminsEndpoint()
         {
-            _context = context;
+            var currentUser = GetCurrentUser();
+
+            return Ok($"Hi {currentUser.Username}, you are an {currentUser.RoleId}");
         }
 
-        // GET: api/Roles
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Role>>> GetRoles()
+
+        [HttpGet("Admin")]
+        [Authorize(Roles = "1")]
+        public IActionResult SellersEndpoint()
         {
-          if (_context.Roles == null)
-          {
-              return NotFound();
-          }
-            return await _context.Roles.ToListAsync();
+            var currentUser = GetCurrentUser();
+
+            return Ok($"Hi {currentUser.Username}, you are a {currentUser.RoleId}");
         }
 
-        // GET: api/Roles/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Role>> GetRole(int id)
+        [HttpGet("Student")]
+        [Authorize(Roles = "3")]
+        public IActionResult AdminsAndSellersEndpoint()
         {
-          if (_context.Roles == null)
-          {
-              return NotFound();
-          }
-            var role = await _context.Roles.FindAsync(id);
+            var currentUser = GetCurrentUser();
 
-            if (role == null)
-            {
-                return NotFound();
-            }
-
-            return role;
+            return Ok($"Hi {currentUser.Username}, you are an {currentUser.RoleId}");
         }
 
-        // PUT: api/Roles/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutRole(int id, Role role)
+        [HttpGet("Public")]
+        public IActionResult Public()
         {
-            if (id != role.RoleId)
-            {
-                return BadRequest();
-            }
+            return Ok("Hi, you're on public property");
+        }
 
-            _context.Entry(role).State = EntityState.Modified;
+        private User GetCurrentUser()
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
 
-            try
+            if (identity != null)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!RoleExists(id))
+                var userClaims = identity.Claims;
+
+                return new User
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                    Username = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.NameIdentifier)?.Value,
+                    Email = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.Email)?.Value,
+                    RoleId = int.Parse(userClaims.FirstOrDefault(o => o.Type == ClaimTypes.Role)?.Value)
+                };
             }
-
-            return NoContent();
-        }
-
-        // POST: api/Roles
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Role>> PostRole(Role role)
-        {
-          if (_context.Roles == null)
-          {
-              return Problem("Entity set 'LmmAssignmentContext.Roles'  is null.");
-          }
-            _context.Roles.Add(role);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetRole", new { id = role.RoleId }, role);
-        }
-
-        // DELETE: api/Roles/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteRole(int id)
-        {
-            if (_context.Roles == null)
-            {
-                return NotFound();
-            }
-            var role = await _context.Roles.FindAsync(id);
-            if (role == null)
-            {
-                return NotFound();
-            }
-
-            _context.Roles.Remove(role);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool RoleExists(int id)
-        {
-            return (_context.Roles?.Any(e => e.RoleId == id)).GetValueOrDefault();
+            return null;
         }
     }
+
 }
