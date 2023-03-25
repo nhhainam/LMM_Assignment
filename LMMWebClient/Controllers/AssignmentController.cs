@@ -1,14 +1,44 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using LMMWebClient.DataAccess;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Net.Http.Headers;
 
 namespace LMMWebClient.Controllers
 {
     public class AssignmentController : Controller
     {
-        // GET: AssignmentController
-        public ActionResult Index()
+        private readonly IConfiguration configuration;
+        private readonly HttpClient client = null;
+        private string AssignmentApiUrl = "";
+        public AssignmentController(IConfiguration _configuration)
         {
-            return View();
+            configuration = _configuration;
+            client = new HttpClient();
+            var contentType = new MediaTypeWithQualityHeaderValue("application/json");
+            client.DefaultRequestHeaders.Accept.Add(contentType);
+            var portUrl = configuration["PortUrl"];
+            AssignmentApiUrl = portUrl + "api/Assignments";
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            HttpResponseMessage response = await client.GetAsync(AssignmentApiUrl);
+            string strData = await response.Content.ReadAsStringAsync();
+
+            dynamic temp = JObject.Parse(strData);
+            var lst = temp.value;
+            List<Assignment> items = ((JArray)temp.value).Select(x => new Assignment
+            {
+                //AssignmentId = (int)x["Id"],
+                //Author = (string)x["Author"],
+                //ISBN = (string)x["ISBN"],
+                //Title = (string)x["Title"],
+                //Price = (decimal)x["Price"]
+            }).ToList();
+
+            return View(items);
         }
 
         // GET: AssignmentController/Details/5
@@ -24,7 +54,7 @@ namespace LMMWebClient.Controllers
         }
 
         // POST: AssignmentController/Create
-        [HttpPost]
+        [HttpPost]  
         [ValidateAntiForgeryToken]
         public ActionResult Create(IFormCollection collection)
         {
