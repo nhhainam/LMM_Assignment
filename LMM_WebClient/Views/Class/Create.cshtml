@@ -1,0 +1,66 @@
+﻿@inject IHttpContextAccessor HttpContextAccessor
+@model IEnumerable<LMM_WebClient.Models.ClassDTO>
+@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<html lang="en">
+<head>
+	<title>Learning Material Management</title>
+	<meta charset="UTF-8">
+	<!-- Stylesheets -->
+	<link rel="stylesheet" href="~/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="~/css/font-awesome.min.css" />
+	<link rel="stylesheet" href="~/css/style.css" />
+
+	<style>
+		body {
+			background: url('@Url.Content("~/img/bg.jpg")') no-repeat center center fixed;
+			background-size: cover;
+			/* other CSS properties */
+		}
+
+		.wrapper {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100vh;
+		}
+	</style>
+</head>
+<body>
+
+	<!-- Header section end -->
+	<!-- Hero section -->
+	<div class="wrapper">
+		<section class="hero-section set-bg">
+			<div class="container mx-auto">
+				<!-- search section -->
+				<section class="search-section">
+					<div class="container">
+						<div class="search-warp">
+							<div class="section-title text-white">
+								<h2>Create your class</h2>
+							</div>
+							<div class="row">
+								<div class="col-md-10 offset-md-1">
+									<!-- search form -->
+									<form asp-action="Create" method="post">
+										<div class="form-group">
+											<label for="classCode">Class Code:</label>
+											<input type="text" class="form-control" id="classCode" name="classCode" placeholder="Enter Class Code" required>
+											<label for="classCode">Class Description:</label>
+											<input type="text" class="form-control" id="classDescription" name="classDescription" placeholder="Enter Class Description" required>
+											<input type="hidden" class="form-control" id="userId" name="userId" value="@HttpContextAccessor.HttpContext.Session.GetString("userId")">
+										</div>
+										<button type="submit" class="btn btn-primary">Create Class</button>
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+			</div>
+		</section>
+	</div>
+</body>
+</html>
