@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using LMMWebAPI.DataAccess;
 using AutoMapper;
 using LMMWebAPI.Models;
+using Microsoft.AspNetCore.Authorization;
+using NuGet.Protocol.Core.Types;
+using LMM_WebClient.Models;
 
 namespace LMMWebAPI.Controllers
 {
@@ -83,23 +86,42 @@ namespace LMMWebAPI.Controllers
 			return classDTOs;
 		}
 
-		// GET: api/Classes/5
-		[HttpGet("{id}")]
-        public async Task<ActionResult<Class>> GetClass(int id)
-        {
-          if (_context.Classes == null)
-          {
-              return NotFound();
-          }
-            var @class = await _context.Classes.FindAsync(id);
-
-            if (@class == null)
-            {
-                return NotFound();
-            }
-
-            return @class;
-        }
+		[HttpPost("[action]")]
+		//[Authorize(Roles = "2")]
+		public async Task<IActionResult> CreateClass([FromBody] CreateClassDTO createClassDTO)
+		{
+			int userId = createClassDTO.CreatorId;
+			string classCode = createClassDTO.ClassCode;
+			string classDescription = createClassDTO.Description;
+			if (_context.Classes == null)
+			{
+				return NotFound();
+			}
+			var user =  await _context.Users.FindAsync(userId);
+			if (user == null)
+			{
+				return NotFound("User not found");
+			}
+			Class c = new Class
+			{
+				ClassId = 0,
+				ClassCode = classCode,
+				Description = classDescription
+			};
+			try
+			{
+				_context.Classes.Add(c);
+				await _context.SaveChangesAsync();
+				user.Classes.Add(c);
+				await _context.SaveChangesAsync();
+				return Ok();
+			}
+			catch (DbUpdateException)
+			{
+				// If there's a problem saving the changes to the database, return an error
+				return StatusCode(StatusCodes.Status500InternalServerError, "Failed to create class");
+			}
+		}
 
 		[HttpPost("[action]")]
 		public async Task<ActionResult> JoinClass([FromBody] JoinClassDTO joinClassDTO)

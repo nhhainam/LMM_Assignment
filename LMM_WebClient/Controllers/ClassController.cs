@@ -60,7 +60,38 @@ namespace LMM_WebClient.Controllers
 			}
 
 			return View(item);
-        }
+		}
+		public async Task<IActionResult> Create()
+		{
+			client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("JWT"));
+			String userId = (String)HttpContext.Session.GetString("userId");
+			return View();
+		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Create(string classCode, string classDescription, string userId)
+		{
+			client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("JWT"));
+			if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(classCode) || string.IsNullOrEmpty(classDescription))
+			{
+				return RedirectToAction("Index");
+			}
+			CreateClassDTO createClassDTO = new CreateClassDTO
+			{
+				ClassCode = classCode,
+				Description = classDescription,
+				CreatorId = Int32.Parse(userId),
+			};
+			string json = JsonConvert.SerializeObject(createClassDTO);
+			StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+
+			string apiEndpoint = apiurl + "/CreateClass";
+			HttpResponseMessage response = await client.PostAsync(apiEndpoint, content);
+			string strData = await response.Content.ReadAsStringAsync();
+			return RedirectToAction("Index");
+		}
 
 		// GET: ClassController/Details/5
 		public async Task<IActionResult> Search(string classCode, string userId)
