@@ -1,4 +1,5 @@
 ﻿using LMM_WebClient.Entity;
+using LMM_WebClient.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -34,7 +35,7 @@ namespace LMM_WebClient.Controllers
             string strData = await response.Content.ReadAsStringAsync();
 
 
-			if (strData != null)
+			if (!strData.Equals("[]"))
 			{
 				items = JsonConvert.DeserializeObject<List<Class>>(strData);
 
@@ -61,16 +62,30 @@ namespace LMM_WebClient.Controllers
 			return View(item);
         }
 
-        // GET: ClassController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
+		// GET: ClassController/Details/5
+		public async Task<IActionResult> Search(string classCode, string userId)
+		{
+            List<ClassDTO> items = null;
+			if (string.IsNullOrEmpty(classCode))
+			{
+				return View(items);
+			}
+			string apiEndpoint = apiurl + "/Search?" + "classCode=" + classCode + "&userId=" + Int32.Parse(userId);
 
-        // POST: ClassController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+			HttpResponseMessage response = await client.GetAsync(apiEndpoint);
+			string strData = await response.Content.ReadAsStringAsync();
+
+
+			if (!strData.Equals("[]"))
+			{
+				items = JsonConvert.DeserializeObject<List<ClassDTO>>(strData);
+
+			}
+
+			return View(items);
+		}
+
+        public async Task<ActionResult> JoinClass(string userId, string classId)
         {
             try
             {

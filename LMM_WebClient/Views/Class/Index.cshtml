@@ -12,9 +12,24 @@
 	<link rel="stylesheet" href="~/css/font-awesome.min.css" />
 	<link rel="stylesheet" href="~/css/style.css" />
 
+	<style>
+		body {
+			background: url('@Url.Content("~/img/bg.jpg")') no-repeat center center fixed;
+			background-size: cover;
+			/* other CSS properties */
+		}
+
+		.wrapper {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100vh;
+		}
+	</style>
 </head>
 <body>
 	<!-- class section -->
+	<div class="wrapper">
 	<section class="class-section spad">
 		<div class="container">
 			<div class="section-title">
@@ -24,23 +39,29 @@
 				@foreach (var item in Model)
 				{
 
+						<div class="col-sm-4 finance">
 					<!-- categorie -->
-					<a asp-action="Details" asp-route-id="@item.ClassId">
-					<div class="col-lg-4 col-md-6">
-						<div class="categorie-item">
-							<div class="ci-thumb set-bg" data-setbg=""></div>
-								<div class="ci-text">
-									<h5>@Html.DisplayFor(modelItem => item.ClassCode)</h5>
-									<p>@Html.DisplayFor(modelItem => item.Description)</p>
+						<a asp-action="Details" asp-route-id="@item.ClassId">
+							<!-- course -->
+								<div class="course-item">
+									<div class="course-thumb set-bg" style="background: url('@Url.Content("~/img/courses/1.jpg")')">
+									</div>
+									<div class="course-info">
+										<div class="course-text">
+											<h5>@Html.DisplayFor(modelItem => item.ClassCode)</h5>
+											<p>@Html.DisplayFor(modelItem => item.Description)</p>
+										</div>
+									</div>
 								</div>
-							</div>
+							</a>
 						</div>
-					</a>
 					<!-- categorie -->
 				}
 
 			</div>
+			</div>
 	</section>
+	</div>
 	<!-- class section end -->
 	<!-- Hero section end -->
 </body>

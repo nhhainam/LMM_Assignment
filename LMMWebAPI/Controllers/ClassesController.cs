@@ -54,6 +54,31 @@ namespace LMMWebAPI.Controllers
 	                    .ToListAsync();
 		}
 
+		// GET: api/Classes
+		[HttpGet("[action]")]
+		public async Task<ActionResult<IEnumerable<ClassDTO>>> Search(string classCode, int userId)
+		{
+			var classes = await _context.Classes
+				.Where(c => c.ClassCode.ToLower().Contains(classCode.ToLower()))
+				.ToListAsync();
+
+			var classDTOs = new List<ClassDTO>();
+			foreach (var @class in classes)
+			{
+				var isEnrolled = await _context.UserClasses
+					.AnyAsync(uc => uc.UserId == userId && uc.ClassId == @class.ClassId);
+
+				var classDTO = new ClassDTO
+				{
+					Class = @class,
+					IsEnrolled = isEnrolled
+				};
+				classDTOs.Add(classDTO);
+			}
+
+			return classDTOs;
+		}
+
 		// GET: api/Classes/5
 		[HttpGet("{id}")]
         public async Task<ActionResult<Class>> GetClass(int id)
