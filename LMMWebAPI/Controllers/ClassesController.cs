@@ -142,73 +142,43 @@ namespace LMMWebAPI.Controllers
 
 		}
 
-		// PUT: api/Classes/5
-		// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-		[HttpPut("{id}")]
-        public async Task<IActionResult> PutClass(int id, Class @class)
-        {
-            if (id != @class.ClassId)
-            {
-                return BadRequest();
-            }
+		[HttpDelete("[action]")]
+		public async Task<ActionResult> LeaveClass(int classId, int userId)
+		{
+			var user = await _context.Users.FindAsync(userId);
+			if (user == null)
+			{
+				return NotFound("User not found");
+			}
 
-            _context.Entry(@class).State = EntityState.Modified;
+			// Get the class to leave
+			var @class = await _context.Classes.FindAsync(classId);
+			if (@class == null)
+			{
+				return NotFound("Class not found");
+			}
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ClassExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+			// Check if the user is enrolled in the class
+			var isEnrolled = await _context.Users.AnyAsync(u => u.UserId == userId && u.Classes.Any(c => c.ClassId == @class.ClassId));
+			if (isEnrolled == null)
+			{
+				return BadRequest("User is not enrolled in the class");
+			}
 
-            return NoContent();
-        }
+			try
+			{
+				user.Classes.Remove(@class);
+				await _context.SaveChangesAsync();
+				return Ok("User left class successfully");
+			}
+			catch (DbUpdateException)
+			{
+				// If there's a problem saving the changes to the database, return an error
+				return StatusCode(StatusCodes.Status500InternalServerError, "Failed to leave class");
+			}
+		}
 
-        // POST: api/Classes
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Class>> PostClass(Class @class)
-        {
-          if (_context.Classes == null)
-          {
-              return Problem("Entity set 'LmmAssignmentContext.Classes'  is null.");
-          }
-            _context.Classes.Add(@class);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetClass", new { id = @class.ClassId }, @class);
-        }
-
-        // DELETE: api/Classes/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteClass(int id)
-        {
-            if (_context.Classes == null)
-            {
-                return NotFound();
-            }
-            var @class = await _context.Classes.FindAsync(id);
-            if (@class == null)
-            {
-                return NotFound();
-            }
-
-            _context.Classes.Remove(@class);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool ClassExists(int id)
+		private bool ClassExists(int id)
         {
             return (_context.Classes?.Any(e => e.ClassId == id)).GetValueOrDefault();
         }

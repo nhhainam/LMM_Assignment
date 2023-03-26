@@ -110,8 +110,23 @@ namespace LMM_WebClient.Controllers
 			return RedirectToAction("Index");
 		}
 
-        // GET: ClassController/Edit/5
-        public ActionResult Edit(int id)
+		public async Task<ActionResult> LeaveClass(string userId, string classId)
+		{
+			if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(classId))
+			{
+				return RedirectToAction("Index");
+			}
+			string apiEndpoint = apiurl + "/LeaveClass?" + "classId=" + Int32.Parse(classId) + "&userId=" + Int32.Parse(userId);
+
+			HttpResponseMessage response = await client.DeleteAsync(apiEndpoint);
+			string strData = await response.Content.ReadAsStringAsync();
+
+
+			return RedirectToAction("Index");
+		}
+
+		// GET: ClassController/Edit/5
+		public ActionResult Edit(int id)
         {
             return View();
         }
