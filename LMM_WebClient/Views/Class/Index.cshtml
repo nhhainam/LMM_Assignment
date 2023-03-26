@@ -1,0 +1,47 @@
+﻿@model IEnumerable<LMM_WebClient.Entity.Class>
+
+<html lang="en">
+<head>
+	<title>Learning Material Management</title>
+	<meta charset="UTF-8">
+	<meta name="description" content="Learning Material Management">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- Stylesheets -->
+	<link rel="stylesheet" href="~/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="~/css/font-awesome.min.css" />
+	<link rel="stylesheet" href="~/css/style.css" />
+
+</head>
+<body>
+	<!-- class section -->
+	<section class="class-section spad">
+		<div class="container">
+			<div class="section-title">
+				<h2>Your class:</h2>
+			</div>
+			<div class="row">
+				@foreach (var item in Model)
+				{
+
+					<!-- categorie -->
+					<a asp-action="Details" asp-route-id="@item.ClassId">
+					<div class="col-lg-4 col-md-6">
+						<div class="categorie-item">
+							<div class="ci-thumb set-bg" data-setbg=""></div>
+								<div class="ci-text">
+									<h5>@Html.DisplayFor(modelItem => item.ClassCode)</h5>
+									<p>@Html.DisplayFor(modelItem => item.Description)</p>
+								</div>
+							</div>
+						</div>
+					</a>
+					<!-- categorie -->
+				}
+
+			</div>
+	</section>
+	<!-- class section end -->
+	<!-- Hero section end -->
+</body>
+</html>

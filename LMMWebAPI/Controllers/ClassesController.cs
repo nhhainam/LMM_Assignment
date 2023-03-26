@@ -36,10 +36,26 @@ namespace LMMWebAPI.Controllers
               return NotFound();
           }
             return await _context.Classes.ToListAsync();
-        }
+		}
 
-        // GET: api/Classes/5
-        [HttpGet("{id}")]
+		// GET: api/Classes
+		[HttpGet("[action]")]
+		public async Task<ActionResult<IEnumerable<Class>>> GetClassesByUserId(int userId)
+		{
+			if (_context.Classes == null)
+			{
+				return NotFound();
+			}
+
+
+			return await _context.UserClasses
+	                    .Where(uc => uc.UserId == userId)
+	                    .Select(uc => uc.Class)
+	                    .ToListAsync();
+		}
+
+		// GET: api/Classes/5
+		[HttpGet("{id}")]
         public async Task<ActionResult<Class>> GetClass(int id)
         {
           if (_context.Classes == null)

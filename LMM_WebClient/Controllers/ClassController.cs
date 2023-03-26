@@ -1,20 +1,64 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using LMM_WebClient.Entity;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Net.Http.Headers;
+using System.Text;
 
 namespace LMM_WebClient.Controllers
 {
     public class ClassController : Controller
     {
-        // GET: ClassController
-        public ActionResult Index()
+        private IConfiguration configuration;
+        private HttpClient client = null;
+        private string apiurl = "";
+
+        public ClassController(IConfiguration _configuration)
         {
-            return View();
+            configuration = _configuration;
+            client = new HttpClient();
+            var contentType = new MediaTypeWithQualityHeaderValue("application/json");
+            client.DefaultRequestHeaders.Accept.Add(contentType);
+            apiurl = configuration.GetValue<string>("PortUrl") + "api/Classes";
+
+        }
+        // GET: ClassController
+        public async Task<IActionResult> Index()
+		{
+			List<Class> items = new List<Class>();
+			String userId = (String)HttpContext.Session.GetString("userId");
+            string apiEndpoint = apiurl + "/GetClassesByUserId?" + "userId=" + userId;
+
+			HttpResponseMessage response = await client.GetAsync(apiEndpoint);
+            string strData = await response.Content.ReadAsStringAsync();
+
+
+			if (strData != null)
+			{
+				items = JsonConvert.DeserializeObject<List<Class>>(strData);
+
+			}
+            return View(items);
         }
 
         // GET: ClassController/Details/5
-        public ActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            return View();
+            Class item = new Class();
+			string apiEndpoint = apiurl + "/" + id;
+
+			HttpResponseMessage response = await client.GetAsync(apiEndpoint);
+			string strData = await response.Content.ReadAsStringAsync();
+
+
+			if (strData != null)
+			{
+				item = JsonConvert.DeserializeObject<Class>(strData);
+
+			}
+
+			return View(item);
         }
 
         // GET: ClassController/Create

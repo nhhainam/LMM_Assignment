@@ -31,9 +31,18 @@ namespace LMM_WebClient.Controllers
                 return RedirectToAction("Index", "Home");
             }
             return View();
-        }
+		}
+		public IActionResult Register()
+		{
+			String isLoggedIn = (String)HttpContext.Session.GetString("isLoggedIn");
+			if (isLoggedIn != null && isLoggedIn.Equals("true"))
+			{
+				return RedirectToAction("Index", "Home");
+			}
+			return View();
+		}
 
-        [HttpPost]
+		[HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(UserLogin userLogin)
         {
@@ -75,7 +84,7 @@ namespace LMM_WebClient.Controllers
             HttpContext.Session.Remove("JWT");
             HttpContext.Session.Remove("JWT");
             HttpContext.Session.Remove("isLoggedIn");
-            return RedirectToAction("Login", "Login");
+            return RedirectToAction("Login", "Auth");
         }
     }
 }

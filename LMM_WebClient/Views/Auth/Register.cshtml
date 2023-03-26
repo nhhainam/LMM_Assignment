@@ -7,7 +7,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
-    <title>Login</title>
+    <title>Register</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/font-awesome.min.css" />
@@ -19,7 +19,7 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Login</h3>
+                        <h3 class="card-title">Register</h3>
                     </div>
                     <div class="card-body">
                         <form method="post">
@@ -32,13 +32,20 @@
                                 <input type="password" id="password" name="password" class="form-control" required />
                             </div>
                             <div class="form-group">
-                                <button type="submit" class="btn btn-primary">Login</button>
+                                <label for="password">Email:</label>
+                                <input type="text" id="email" name="email" class="form-control" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Phone:</label>
+                                <input type="number" id="phone" name="phone" class="form-control" required />
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary">Register</button>
                             </div>
                         </form>
+
+                        <a asp-area="" asp-controller="Auth" asp-action="Login" class="site-btn">Back to login</a>
                     </div>
-                    <a asp-area="" asp-controller="Home" asp-action="Index" class="site-btn">Back to home</a>
-                    <br />
-                    <a asp-area="" asp-controller="Auth" asp-action="Register" class="site-btn">Do not have an account? Signup one.</a>
                 </div>
             </div>
         </div>
