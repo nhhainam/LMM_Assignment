@@ -29,6 +29,7 @@ CREATE TABLE Class (
 CREATE TABLE UserClass (
   user_id INT NOT NULL,
   class_id INT NOT NULL,
+  PRIMARY KEY (user_id, class_id),
   FOREIGN KEY (user_id) REFERENCES Users(user_id),
   FOREIGN KEY (class_id) REFERENCES Class(class_id)
 );
