@@ -48,16 +48,21 @@ namespace LMMWebAPI.Controllers
 			}
 
 
-			return await _context.UserClasses
-	                    .Where(uc => uc.UserId == userId)
-	                    .Select(uc => uc.Class)
-	                    .ToListAsync();
+			return await _context.Users.Include(u => u.Classes)
+					.Where(u => u.UserId == userId)
+					.SelectMany(u => u.Classes)
+					.ToListAsync();
 		}
 
 		// GET: api/Classes
 		[HttpGet("[action]")]
 		public async Task<ActionResult<IEnumerable<ClassDTO>>> Search(string classCode, int userId)
 		{
+			if (_context.Classes == null)
+			{
+				return NotFound();
+			}
+
 			var classes = await _context.Classes
 				.Where(c => c.ClassCode.ToLower().Contains(classCode.ToLower()))
 				.ToListAsync();
@@ -65,8 +70,7 @@ namespace LMMWebAPI.Controllers
 			var classDTOs = new List<ClassDTO>();
 			foreach (var @class in classes)
 			{
-				var isEnrolled = await _context.UserClasses
-					.AnyAsync(uc => uc.UserId == userId && uc.ClassId == @class.ClassId);
+				var isEnrolled = await _context.Users.AnyAsync(u => u.UserId == userId && u.Classes.Any(c => c.ClassId == @class.ClassId));
 
 				var classDTO = new ClassDTO
 				{
@@ -97,9 +101,50 @@ namespace LMMWebAPI.Controllers
             return @class;
         }
 
-        // PUT: api/Classes/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
+		[HttpPost("[action]")]
+		public async Task<ActionResult> JoinClass([FromBody] JoinClassDTO joinClassDTO)
+		{
+            int userId = joinClassDTO.UserId;
+            int classId = joinClassDTO.ClassId;
+			// Get the user making the request
+			var user = await _context.Users.FindAsync(userId);
+			if (user == null)
+			{
+				return NotFound("User not found");
+			}
+
+			// Get the class to join
+			var @class = await _context.Classes.FindAsync(classId);
+			if (@class == null)
+			{
+				return NotFound("Class not found");
+			}
+
+			// Check if the user is already enrolled in the class
+			var isEnrolled = await _context.Users.AnyAsync(u => u.UserId == userId && u.Classes.Any(c => c.ClassId == @class.ClassId));
+			if (isEnrolled)
+			{
+				return BadRequest("User is already enrolled in the class");
+			}
+
+
+			try
+			{
+				user.Classes.Add(@class);
+				await _context.SaveChangesAsync();
+				return Ok("User joined class successfully");
+			}
+			catch (DbUpdateException)
+			{
+				// If there's a problem saving the changes to the database, return an error
+				return StatusCode(StatusCodes.Status500InternalServerError, "Failed to join class");
+			}
+
+		}
+
+		// PUT: api/Classes/5
+		// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+		[HttpPut("{id}")]
         public async Task<IActionResult> PutClass(int id, Class @class)
         {
             if (id != @class.ClassId)
