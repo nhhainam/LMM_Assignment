@@ -29,22 +29,15 @@ public partial class LmmAssignmentContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
-    public virtual DbSet<UserClass> UserClasses { get; set; }
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured)
-        {
-            string constr = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().
-                                GetConnectionString("MyDb").ToString();
-            optionsBuilder.UseSqlServer(constr);
-        }
-    }
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("server=HAINAM\\SQLEXPRESS; database =LMM_Assignment; uid=sa;pwd=sa;TrustServerCertificate=True;");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Assignment>(entity =>
         {
-            entity.HasKey(e => e.AssignmentId).HasName("PK__Assignme__DA891814C4FCA949");
+            entity.HasKey(e => e.AssignmentId).HasName("PK__Assignme__DA8918140E7D9712");
 
             entity.ToTable("Assignment");
 
@@ -66,17 +59,17 @@ public partial class LmmAssignmentContext : DbContext
             entity.HasOne(d => d.Class).WithMany(p => p.Assignments)
                 .HasForeignKey(d => d.ClassId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Assignmen__class__1CF15040");
+                .HasConstraintName("FK__Assignmen__class__1DE57479");
 
             entity.HasOne(d => d.Owner).WithMany(p => p.Assignments)
                 .HasForeignKey(d => d.OwnerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Assignmen__owner__1DE57479");
+                .HasConstraintName("FK__Assignmen__owner__1ED998B2");
         });
 
         modelBuilder.Entity<Class>(entity =>
         {
-            entity.HasKey(e => e.ClassId).HasName("PK__Class__FDF47986BC81A797");
+            entity.HasKey(e => e.ClassId).HasName("PK__Class__FDF47986A7A67A2A");
 
             entity.ToTable("Class");
 
@@ -93,7 +86,7 @@ public partial class LmmAssignmentContext : DbContext
 
         modelBuilder.Entity<Grade>(entity =>
         {
-            entity.HasKey(e => e.GradeId).HasName("PK__Grade__3A8F732C515C68BC");
+            entity.HasKey(e => e.GradeId).HasName("PK__Grade__3A8F732CBFD79CC3");
 
             entity.ToTable("Grade");
 
@@ -108,12 +101,12 @@ public partial class LmmAssignmentContext : DbContext
             entity.HasOne(d => d.Submission).WithMany(p => p.Grades)
                 .HasForeignKey(d => d.SubmissionId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Grade__submissio__24927208");
+                .HasConstraintName("FK__Grade__submissio__25869641");
         });
 
         modelBuilder.Entity<Material>(entity =>
         {
-            entity.HasKey(e => e.MaterialId).HasName("PK__Material__6BFE1D28AB991FE4");
+            entity.HasKey(e => e.MaterialId).HasName("PK__Material__6BFE1D28CE9002D9");
 
             entity.ToTable("Material");
 
@@ -131,12 +124,12 @@ public partial class LmmAssignmentContext : DbContext
             entity.HasOne(d => d.Class).WithMany(p => p.Materials)
                 .HasForeignKey(d => d.ClassId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Material__class___1A14E395");
+                .HasConstraintName("FK__Material__class___1B0907CE");
         });
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__Roles__760965CC4391BEBF");
+            entity.HasKey(e => e.RoleId).HasName("PK__Roles__760965CC5C541C41");
 
             entity.Property(e => e.RoleId).HasColumnName("role_id");
             entity.Property(e => e.RoleName)
@@ -147,7 +140,7 @@ public partial class LmmAssignmentContext : DbContext
 
         modelBuilder.Entity<Submission>(entity =>
         {
-            entity.HasKey(e => e.SubmissionId).HasName("PK__Submissi__9B535595869E852A");
+            entity.HasKey(e => e.SubmissionId).HasName("PK__Submissi__9B53559596AF6EA9");
 
             entity.ToTable("Submission");
 
@@ -165,17 +158,17 @@ public partial class LmmAssignmentContext : DbContext
             entity.HasOne(d => d.Assignment).WithMany(p => p.Submissions)
                 .HasForeignKey(d => d.AssignmentId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Submissio__assig__20C1E124");
+                .HasConstraintName("FK__Submissio__assig__21B6055D");
 
             entity.HasOne(d => d.Owner).WithMany(p => p.Submissions)
                 .HasForeignKey(d => d.OwnerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Submissio__owner__21B6055D");
+                .HasConstraintName("FK__Submissio__owner__22AA2996");
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__Users__B9BE370F9DB2352E");
+            entity.HasKey(e => e.UserId).HasName("PK__Users__B9BE370F422A2055");
 
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.Email)
@@ -208,26 +201,25 @@ public partial class LmmAssignmentContext : DbContext
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Users__role_id__1273C1CD");
-        });
 
-        modelBuilder.Entity<UserClass>(entity =>
-        {
-            entity
-                .HasNoKey()
-                .ToTable("UserClass");
-
-            entity.Property(e => e.ClassId).HasColumnName("class_id");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
-
-            entity.HasOne(d => d.Class).WithMany()
-                .HasForeignKey(d => d.ClassId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__UserClass__class__173876EA");
-
-            entity.HasOne(d => d.User).WithMany()
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__UserClass__user___164452B1");
+            entity.HasMany(d => d.Classes).WithMany(p => p.Users)
+                .UsingEntity<Dictionary<string, object>>(
+                    "UserClass",
+                    r => r.HasOne<Class>().WithMany()
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.ClientSetNull)
+                        .HasConstraintName("FK__UserClass__class__182C9B23"),
+                    l => l.HasOne<User>().WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.ClientSetNull)
+                        .HasConstraintName("FK__UserClass__user___173876EA"),
+                    j =>
+                    {
+                        j.HasKey("UserId", "ClassId").HasName("PK__UserClas__C6617097B0DCF186");
+                        j.ToTable("UserClass");
+                        j.IndexerProperty<int>("UserId").HasColumnName("user_id");
+                        j.IndexerProperty<int>("ClassId").HasColumnName("class_id");
+                    });
         });
 
         OnModelCreatingPartial(modelBuilder);

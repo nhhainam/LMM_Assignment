@@ -26,4 +26,6 @@ public partial class User
     public virtual Role Role { get; set; } = null!;
 
     public virtual ICollection<Submission> Submissions { get; } = new List<Submission>();
+
+    public virtual ICollection<Class> Classes { get; } = new List<Class>();
 }

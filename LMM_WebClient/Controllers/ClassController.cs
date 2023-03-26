@@ -86,16 +86,29 @@ namespace LMM_WebClient.Controllers
 		}
 
         public async Task<ActionResult> JoinClass(string userId, string classId)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+		{
+			if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(classId))
+			{
+				return RedirectToAction("Index");
+			}
+			JoinClassDTO joinClassDTO = new JoinClassDTO
+			{
+				ClassId = Int32.Parse(classId),
+				UserId = Int32.Parse(userId)
+			};
+
+			string json = JsonConvert.SerializeObject(joinClassDTO);
+
+			StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+
+			string apiEndpoint = apiurl + "/JoinClass";
+
+			HttpResponseMessage response = await client.PostAsync(apiEndpoint, content);
+			string strData = await response.Content.ReadAsStringAsync();
+
+
+			return RedirectToAction("Index");
+		}
 
         // GET: ClassController/Edit/5
         public ActionResult Edit(int id)

@@ -82,7 +82,7 @@
 													}
 													else
 													{
-														<a asp-area="" asp-controller="Class" asp-action="JoinClass" class="site-btn">Enroll me.</a>
+														<a asp-area="" asp-controller="Class" asp-action="JoinClass" asp-route-classId="@item.Class.ClassId" asp-route-userId="@HttpContextAccessor.HttpContext.Session.GetString("userId")" class="site-btn">Enroll me.</a>
 													}
 											</div>
 										</div>
