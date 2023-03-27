@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using System.Text;
+using static System.Net.WebRequestMethods;
 
 namespace LMM_WebClient.Controllers
 {
@@ -48,19 +49,23 @@ namespace LMM_WebClient.Controllers
         {
             Class item = new Class();
 			string apiEndpoint = apiurl + "/" + id;
+            String materialUrl = "https://localhost:5000/api/Materials/getbyclass/" + id;
+            HttpResponseMessage responeMaterial = await client.GetAsync(materialUrl);
+            //HttpResponseMessage response = await client.GetAsync(apiEndpoint);
+			//string strData = await response.Content.ReadAsStringAsync();
+            string materialData = await responeMaterial.Content.ReadAsStringAsync();
+            List<Material> listMaterial = JsonConvert.DeserializeObject<List<Material>>(materialData);
+            ViewBag.ListMaterial = listMaterial;
+            ViewBag.classId = id;
 
-			HttpResponseMessage response = await client.GetAsync(apiEndpoint);
-			string strData = await response.Content.ReadAsStringAsync();
+            //         if (strData != null)
+            //{
+            //	item = JsonConvert.DeserializeObject<Class>(strData);
 
+            //}
 
-			if (strData != null)
-			{
-				item = JsonConvert.DeserializeObject<Class>(strData);
-
-			}
-
-			return View(item);
-		}
+            return View(item);
+        }
 		public async Task<IActionResult> Create()
 		{
 			client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", HttpContext.Session.GetString("JWT"));
