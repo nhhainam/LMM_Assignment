@@ -1,5 +1,143 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿@using LMM_WebClient.Entity
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <section class="class-section spad">
+        <div class="container">
+            <h2>Class Materials</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Material Name</th>
+                    </tr>
+                </thead>
+                <tbody id="listMaterial">
+                    @{
+                        var listMaterial = ViewBag.ListMaterial as List<Material>;
+                    }
+
+                    @if (listMaterial != null)
+                    {
+                        @foreach (var material in listMaterial)
+                        {
+                            <tr>
+                                <td><a href="@material.FilePath" download>@material.Title</a></td>
+                                <td><a class="btn btn-primary" href="Materials/Delete">Delete</a></td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+
+            <button id="abc" type="button" class="btn btn-primary" data-toggle="modal" data-target="#uploadModal">Upload Material</button>
+
+            <div class="modal fade" id="uploadModal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Upload Material</h4>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <form>
+                                <div class="form-group">
+                                    <label for="fileInput">Select file:</label>
+                                    <input type="hidden" class="form-control" value="@ViewBag.classId" id="classId" />
+                                    <input type="file" class="form-control-file" id="fileInput">
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" id="uploadButton" class="btn btn-success" data-dismiss="modal">Upload</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+ <script>
+        function ShowAllOrders() {
+            $("table tbody").html("");
+            var classId = $('#classId').val();
+            $.ajax({
+                url: "https://localhost:5000/api/Materials/getbyclass/" + classId,
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (result, status, xhr) {
+                    console.log(result);
+                    $.each(result, function (index, result) {
+                        $("tbody").append($("<tr>"));
+                        var filePath = result["title"];
+                        console.log(filePath);
+                        appendElement = $("tbody tr").last();
+                        appendElement.append($("<td display=\"none\">").html(result["title"]));
+                        appendElement.append($("<td>").html("<button class=\"btn btn-primary delete\" href=\""
+                            + "\">Delete</a>"));
+                    })
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr);
+                }
+            });
+        };
+        $(document).ready(function () {
+            ShowAllOrders();
+
+        });
+        $(function () {
+            $('#uploadButton').on('click', function (e) {
+                e.preventDefault();
+                var formdata = new FormData();
+                var file = $('#fileInput')[0];
+                var classId = $('#classId').val();
+                formdata.append('file', file.files[0]);
+                formdata.append('classId', classId);
+                console.log(file);
+                console.log(classId);
+
+                // Gửi yêu cầu lên server
+                $.ajax({
+                    url: "https://localhost:5000/api/Materials",
+                    type: 'POST',
+                    data: formdata,
+                    processData: false,
+                    contentType: false,
+                    success: function (index,result) {
+                        ShowAllOrders();
+                    },
+                    error: function () {
+                        alert('Failed to upload material');
+                    }
+                });
+            });
+        });
+        $("table").on("click", "button.delete", function () {
+            var productId = $(this).parents("tr").find("td:nth-child(1)").text();
+
+            $.ajax({
+                url: "https://localhost:5000/api/Materials/" + productId,
+                type: "delete",
+                contentType: "application/json",
+                success: function (result, status, xhr) {
+                    ShowAllOrders();
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr)
+                }
+            });
+        });
+ </script>
+
+</body>
+</html>
