@@ -16,6 +16,7 @@
                 <thead>
                     <tr>
                         <th>Material Name</th>
+                        <th>Delete</th>
                     </tr>
                 </thead>
                 <tbody id="listMaterial">
@@ -81,6 +82,7 @@
                         var filePath = result["title"];
                         console.log(filePath);
                         appendElement = $("tbody tr").last();
+                        appendElement.append($("<td style=\"display: none\">").html(result["materialId"]));
                         appendElement.append($("<td display=\"none\">").html(result["title"]));
                         appendElement.append($("<td>").html("<button class=\"btn btn-primary delete\" href=\""
                             + "\">Delete</a>"));
@@ -124,7 +126,7 @@
         });
         $("table").on("click", "button.delete", function () {
             var productId = $(this).parents("tr").find("td:nth-child(1)").text();
-
+            console.log(productId);
             $.ajax({
                 url: "https://localhost:5000/api/Materials/" + productId,
                 type: "delete",
