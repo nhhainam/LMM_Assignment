@@ -20,7 +20,7 @@ namespace LMM_WebClient.Controllers
             client = new HttpClient();
             var contentType = new MediaTypeWithQualityHeaderValue("application/json");
             client.DefaultRequestHeaders.Accept.Add(contentType);
-            apiurl = configuration.GetValue<string>("PortUrl") + "api/Login";
+            apiurl = configuration.GetValue<string>("PortUrl") + "api/Auth";
 
         }
         public IActionResult Login()
@@ -31,15 +31,32 @@ namespace LMM_WebClient.Controllers
                 return RedirectToAction("Index", "Home");
             }
             return View();
-		}
-		public IActionResult Register()
-		{
+        }
+        public async Task<IActionResult> Register(UserRegister userRegister)
+        {
 			String isLoggedIn = (String)HttpContext.Session.GetString("isLoggedIn");
 			if (isLoggedIn != null && isLoggedIn.Equals("true"))
 			{
 				return RedirectToAction("Index", "Home");
-			}
-			return View();
+            }
+            if (ModelState.IsValid)
+            {
+                string strData = JsonConvert.SerializeObject(userRegister);
+                HttpContent content = new StringContent(strData, Encoding.UTF8, "application/json");
+                string apiEndpoint = apiurl + "/Register";
+                HttpResponseMessage response = await client.PostAsync(apiEndpoint, content);
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction("Login");
+                }
+                else
+                {
+                    string errorMessage = await response.Content.ReadAsStringAsync();
+                    ModelState.AddModelError("", errorMessage);
+                    return View();
+                }
+            }
+            return View();
 		}
 
 		[HttpPost]
@@ -50,7 +67,8 @@ namespace LMM_WebClient.Controllers
             {
                 string strData = JsonConvert.SerializeObject(userLogin);
                 HttpContent content = new StringContent(strData, Encoding.UTF8, "application/json");
-                HttpResponseMessage response = await client.PostAsync(apiurl, content);
+                string apiEndpoint = apiurl + "/Login";
+                HttpResponseMessage response = await client.PostAsync(apiEndpoint, content);
                 if (response.IsSuccessStatusCode)
                 {
                     // Get the token from response

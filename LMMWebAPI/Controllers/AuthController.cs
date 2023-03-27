@@ -12,13 +12,13 @@ namespace LMMWebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class LoginController : ControllerBase
+    public class AuthController : ControllerBase
     {
         private IConfiguration _config;
         private readonly LmmAssignmentContext _context;
         private readonly IMapper mapper;
 
-        public LoginController(LmmAssignmentContext context, IConfiguration config)
+        public AuthController(LmmAssignmentContext context, IConfiguration config)
         {
             _context = context;
             _config = config;
@@ -27,7 +27,7 @@ namespace LMMWebAPI.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost]
+        [HttpPost("[action]")]
         public IActionResult Login([FromBody] UserLogin userLogin)
         {
             var user = Authenticate(userLogin);
@@ -41,6 +41,35 @@ namespace LMMWebAPI.Controllers
             return NotFound("User not found");
         }
 
+        [AllowAnonymous]
+        [HttpPost("[action]")]
+        public IActionResult Register([FromBody] UserRegister userRegister)
+        {
+            // Check if the username already exists
+            if (_context.Users.Any(u => u.Username == userRegister.Username))
+            {
+                return BadRequest("Username already exists");
+            }
+
+            // Create a new User object
+            var user = new User
+            {
+                Username = userRegister.Username,
+                Password = userRegister.Password,
+                UserCode = userRegister.Username,
+                Fullname = userRegister.Username,
+                Email = userRegister.Email,
+                Phone = userRegister.Username,
+                RoleId = 3
+            };
+
+            // Add the user to the database
+            _context.Users.Add(user);
+            _context.SaveChanges();
+
+            // Return a success response
+            return Ok("User registered successfully");
+        }
         private string Generate(User user)
         {
             // var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
